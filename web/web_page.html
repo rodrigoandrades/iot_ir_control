@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<header>
+  <script src="jquery-3.3.1.min.js"></script>
+
+  <style>
+    input[type="text"] {
+      width: 90%;
+      height: 3vh;
+    }
+
+    input[type="button"] {
+      width: 9%;
+      height: 3.6vh;
+    }
+
+    .rxd {
+      height: 90vh;
+    }
+
+    textarea {
+      width: 99%;
+      height: 100%;
+      resize: none;
+    }
+
+    .comando {
+      border: solid 1px gray;
+      background-color: silver;
+      padding: 5px;
+      margin: 5px;
+      float: left;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .comando a {
+      margin: 5px;
+    }
+  </style>
+
+  <script>
+    var Socket;
+    function start() {
+      Socket = new WebSocket('ws://192.168.4.1:81/');
+
+      Socket.onmessage = function (evt) {
+        var item = [];
+        item.push('<div class="comando">');
+        item.push('  <a href="#" onclick="remove(this);">remover</a>');
+        item.push('  <a href="#" onclick="sendCommand(this);">executar</a>');
+        item.push('  <br/>');
+        item.push('  <label>'+evt.data+'</label>');
+        item.push('</div>');
+
+        $('.rxd').append($(item.join("")));
+      }
+
+    }
+
+    function enterpressed() {
+      Socket.send(document.getElementById("txbuff").value);
+      document.getElementById("txbuff").value = "";
+    }
+
+    function remove(item) {
+      $(item).closest(".comando").remove();
+    }
+
+    function sendCommand(item) {
+      Socket.send($(item).closest(".comando").find('label').text());
+    }
+    
+    function changeMode(item) {
+      Socket.send($(item).val());
+    }
+  </script>
+</header>
+
+<body onload="javascript:start();">
+  <div>
+    <!-- <input class="txd" type="text" id="txbuff" onkeydown="if(event.keyCode == 13) enterpressed();">
+    <input class="txd" type="button" onclick="enterpressed();" value="Send" > -->
+    <label>Modo</label>
+    <input type="radio" name="modo" value="m0" onclick="changeMode(this);">Emissor</input>
+    <input type="radio" name="modo" value="m1" checked onclick="changeMode(this);">Receptor</input>
+  </div>
+  <br>
+  <div class="rxd">
+    <!-- <textarea id="rxConsole" readonly></textarea> -->
+  </div>
+</body>
+
+</html>
